@@ -12,6 +12,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   ],
   callbacks: {
     ...authConfig.callbacks,
+    signIn({ user }) {
+      if (!user.email || !user.email.endsWith("@fashionica.com")) {
+        return false;
+      }
+      return true;
+    },
     async session({ session, token }) {
       if (token.sub) session.user.id = token.sub;
       return session;

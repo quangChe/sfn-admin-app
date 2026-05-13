@@ -4,6 +4,7 @@ export const authConfig: NextAuthConfig = {
   trustHost: true,
   pages: {
     signIn: "/login",
+    error: "/login",
   },
   callbacks: {
     authorized({ auth, request }) {
@@ -11,7 +12,6 @@ export const authConfig: NextAuthConfig = {
       if (pathname.startsWith("/login") || pathname.startsWith("/api/auth")) {
         return true;
       }
-      console.log('???', auth?.user);
       return !!auth?.user;
     },
   },
