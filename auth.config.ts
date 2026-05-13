@@ -1,16 +1,17 @@
 import type { NextAuthConfig } from "next-auth";
 
 export const authConfig: NextAuthConfig = {
+  trustHost: true,
   pages: {
     signIn: "/login",
   },
   callbacks: {
     authorized({ auth, request }) {
       const { pathname } = request.nextUrl;
-      const isPublic =
-        pathname.startsWith("/login") ||
-        pathname.startsWith("/api/auth");
-      if (isPublic) return true;
+      if (pathname.startsWith("/login") || pathname.startsWith("/api/auth")) {
+        return true;
+      }
+      console.log('???', auth?.user);
       return !!auth?.user;
     },
   },
