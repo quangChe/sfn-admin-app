@@ -5,9 +5,9 @@ const envSchema = z.object({
   AUTH_GOOGLE_ID: z.string().min(1, "AUTH_GOOGLE_ID is required"),
   AUTH_GOOGLE_SECRET: z.string().min(1, "AUTH_GOOGLE_SECRET is required"),
   SHOPIFY_STORE_DOMAIN: z.string().min(1, "SHOPIFY_STORE_DOMAIN is required"),
-  SHOPIFY_ADMIN_ACCESS_TOKEN: z
-    .string()
-    .min(1, "SHOPIFY_ADMIN_ACCESS_TOKEN is required"),
+  SHOPIFY_ADMIN_ACCESS_TOKEN: z.string().default(""),
+  SHOPIFY_CLIENT_ID: z.string().optional(),
+  SHOPIFY_CLIENT_SECRET: z.string().optional(),
   SHOPIFY_API_VERSION: z.string().default("2026-01"),
   NEXTAUTH_URL: z.string().url().optional(),
   NODE_ENV: z

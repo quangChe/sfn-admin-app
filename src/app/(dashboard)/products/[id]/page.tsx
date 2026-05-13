@@ -17,7 +17,7 @@ export default async function ProductDetailPage({
 
   let product;
   try {
-    const client = getShopifyClient();
+    const client = await getShopifyClient();
     const { data } = await client.request(PRODUCT_BY_ID_QUERY, {
       variables: { id: gid },
     });

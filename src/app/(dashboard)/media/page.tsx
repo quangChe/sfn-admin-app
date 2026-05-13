@@ -6,7 +6,7 @@ import Image from "next/image";
 
 async function getMediaFiles() {
   try {
-    const client = getShopifyClient();
+    const client = await getShopifyClient();
     const { data } = await client.request(FILES_QUERY, {
       variables: { first: 48 },
     });

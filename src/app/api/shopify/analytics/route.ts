@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { getShopifyClient } from "@/lib/shopify/client";
 import {
@@ -6,20 +6,19 @@ import {
   SHOP_INFO_QUERY,
 } from "@/lib/shopify/queries/analytics";
 
-export async function GET(request: NextRequest) {
-  const session = await auth();
-  if (!session) {
+export const GET = auth(async (req) => {
+  if (!req.auth) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { searchParams } = new URL(request.url);
+  const { searchParams } = new URL(req.url);
   const days = parseInt(searchParams.get("days") ?? "30");
   const since = new Date();
   since.setDate(since.getDate() - days);
   const query = `created_at:>=${since.toISOString().split("T")[0]}`;
 
   try {
-    const client = getShopifyClient();
+    const client = await getShopifyClient();
 
     const [shopResult, ordersResult] = await Promise.all([
       client.request(SHOP_INFO_QUERY),
@@ -76,4 +75,4 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});

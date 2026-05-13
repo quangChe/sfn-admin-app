@@ -9,7 +9,7 @@ import {
 
 async function getAnalytics() {
   try {
-    const client = getShopifyClient();
+    const client = await getShopifyClient();
     const since = new Date();
     since.setDate(since.getDate() - 30);
     const query = `created_at:>=${since.toISOString().split("T")[0]}`;

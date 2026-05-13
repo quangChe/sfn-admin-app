@@ -16,7 +16,7 @@ export default async function OrderDetailPage({
 
   let order;
   try {
-    const client = getShopifyClient();
+    const client = await getShopifyClient();
     const { data } = await client.request(ORDER_BY_ID_QUERY, {
       variables: { id: gid },
     });

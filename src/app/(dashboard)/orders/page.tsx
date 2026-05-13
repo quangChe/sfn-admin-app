@@ -6,14 +6,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 async function getOrders(query?: string) {
   try {
-    const client = getShopifyClient();
+    const client = await getShopifyClient();
     const { data } = await client.request(ORDERS_QUERY, {
       variables: { first: 50, query },
     });
     return (data?.orders?.edges ?? []).map(
       (e: { node: ShopifyOrder }) => e.node
     );
-  } catch {
+  } catch (e) {
+    console.error("Shopify orders fetch error:", e);
     return [];
   }
 }

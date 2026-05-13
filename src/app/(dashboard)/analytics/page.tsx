@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 async function getAnalytics(days: number) {
   try {
-    const client = getShopifyClient();
+    const client = await getShopifyClient();
     const since = new Date();
     since.setDate(since.getDate() - days);
     const query = `created_at:>=${since.toISOString().split("T")[0]}`;

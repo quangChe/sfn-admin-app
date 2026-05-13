@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 async function getProducts(query?: string) {
   try {
-    const client = getShopifyClient();
+    const client = await getShopifyClient();
     const { data } = await client.request(PRODUCTS_QUERY, {
       variables: { first: 50, query },
     });

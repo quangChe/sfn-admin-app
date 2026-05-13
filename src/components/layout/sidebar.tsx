@@ -1,5 +1,6 @@
 "use client";
 
+import NextImage from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -11,10 +12,6 @@ import {
   Users,
   BarChart2,
   Image,
-  Table2,
-  HardDrive,
-  Mail,
-  Calendar,
   type LucideIcon,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
@@ -26,17 +23,12 @@ const iconMap: Record<string, LucideIcon> = {
   Users,
   BarChart2,
   Image,
-  Table2,
-  HardDrive,
-  Mail,
-  Calendar,
 };
 
 export function Sidebar() {
   const pathname = usePathname();
 
   const shopifyItems = navItems.filter((i) => i.group === "shopify");
-  const googleItems = navItems.filter((i) => i.group === "google");
   const mainItems = navItems.filter((i) => i.group === "main");
 
   function NavLink({ item }: { item: (typeof navItems)[0] }) {
@@ -65,7 +57,12 @@ export function Sidebar() {
   return (
     <aside className="flex h-full w-60 shrink-0 flex-col border-r bg-background px-3 py-4">
       <div className="mb-4 px-3">
-        <h1 className="text-lg font-bold tracking-tight">SFN Admin</h1>
+        <NextImage
+          src="/fashionica-logo.svg"
+          alt="Fashionica"
+          width={40}
+          height={40}
+        />
       </div>
 
       <nav className="flex flex-1 flex-col gap-1">
@@ -78,14 +75,6 @@ export function Sidebar() {
           Shopify
         </p>
         {shopifyItems.map((item) => (
-          <NavLink key={item.href} item={item} />
-        ))}
-
-        <Separator className="my-2" />
-        <p className="mb-1 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          Google
-        </p>
-        {googleItems.map((item) => (
           <NavLink key={item.href} item={item} />
         ))}
       </nav>

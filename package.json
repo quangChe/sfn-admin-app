@@ -15,8 +15,6 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
-    "google-auth-library": "^9.15.1",
-    "googleapis": "^144.0.0",
     "lucide-react": "^0.576.0",
     "next": "^16.2.0",
     "next-auth": "5.0.0-beta.30",
@@ -28,6 +26,9 @@
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.5.0",
     "zod": "^3.25.76"
+  },
+  "overrides": {
+    "postcss": "^8.5.14"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
