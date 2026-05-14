@@ -12,6 +12,7 @@ import {
   Users,
   BarChart2,
   Image,
+  CalendarDays,
   type LucideIcon,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
@@ -23,6 +24,7 @@ const iconMap: Record<string, LucideIcon> = {
   Users,
   BarChart2,
   Image,
+  CalendarDays,
 };
 
 export function Sidebar() {

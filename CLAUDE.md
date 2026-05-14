@@ -11,6 +11,9 @@ Internal admin dashboard aggregating Shopify (orders, products, customers, media
 - `npm run dev` — Start dev server (localhost:3000)
 - `npm run build` — Production build
 - `npm run lint` — Run ESLint (flat config, ESLint 9)
+- `npm test` — Vitest unit/component tests (watch mode)
+- `npm run test:coverage` — Coverage report
+- `npm run test:e2e` — Playwright E2E tests (requires dev server or starts it automatically)
 - `npx shadcn@latest add <component>` — Add a shadcn/ui component
 
 ## Tech Stack
@@ -92,3 +95,8 @@ in Shopify with a date string in `M.D.YY` format (e.g. `5.1.26`, `5.15.26`).
 - `src/components/drops/` — all drop UI lives here (calendar, workspace, tabs, bulk table)
 - `src/lib/drops/` — tag parsing, GraphQL queries/mutations for drops
 - `src/types/drops.ts` — Drop, DropProduct, WorkflowTab, DropStatus types
+
+## Testing
+- Run `npm test` before marking any drops-related task complete
+- Run `npm run test:e2e` before marking a full page build complete  
+- All pure functions in `src/lib/drops/` must maintain 100% test coverage
