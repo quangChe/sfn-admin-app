@@ -10,6 +10,7 @@ import {
   Search,
   Loader2,
 } from "lucide-react";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useWorkspace } from "@/components/drops/workspace-context";
 import { MOCK_PRODUCTS } from "@/lib/drops/mock-data";
@@ -112,7 +113,7 @@ export default function PricingPage({
       {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ changes: payload }),
+        body: JSON.stringify({ type: "pricing", changes: payload }),
       },
     );
 
@@ -137,6 +138,7 @@ export default function PricingPage({
 
     changesRef.current = new Map();
     rerender();
+    toast.success(`Prices saved for ${payload.length} product${payload.length !== 1 ? "s" : ""}`);
   }, [products, tagStr]);
 
   const discard = useCallback(() => {
@@ -323,10 +325,9 @@ export default function PricingPage({
               const isExpanded = expanded.has(product.id);
 
               return (
-                <div key={product.id}>
-                  <tr
-                    key={product.id}
-                    className={cn(
+                <tr
+                  key={product.id}
+                  className={cn(
                       "group transition-colors",
                       isDirty && "bg-[#faf8f5]",
                       !isDirty && "hover:bg-gray-50/50",

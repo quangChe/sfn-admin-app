@@ -15,11 +15,17 @@ Internal admin dashboard aggregating Shopify (orders, products, customers, media
 - `npm run test:coverage` — Coverage report
 - `npm run test:e2e` — Playwright E2E tests (requires dev server or starts it automatically)
 - `npx shadcn@latest add <component>` — Add a shadcn/ui component
+- `npm run db:generate` — Generate Drizzle migration from schema changes
+- `npm run db:migrate` — Apply pending migrations to Neon
+- `npm run db:seed` — Seed default roles + permissions (requires .env.local)
+- `npm run db:studio` — Open Drizzle Studio (DB browser)
 
 ## Tech Stack
 
 - **Next.js 16** (App Router) + **React 19** + **TypeScript 5** (strict mode)
-- **NextAuth v5 beta** (Google OAuth with offline refresh tokens)
+- **better-auth** (Google OAuth, Drizzle adapter, `@fashionica.com` allowlist)
+- **Neon Postgres** + **Drizzle ORM** (schema in `src/lib/db/schema/`)
+- **Pusher Channels** (server: `pusher`, client: `pusher-js`) — infrastructure only in Phase 1
 - **Shopify Admin API** via `@shopify/admin-api-client` (GraphQL)
 - **Google APIs** via `googleapis` (OAuth2 per-session tokens)
 - **Tailwind CSS v4** + **shadcn/ui** (New York style) + **Lucide** icons
@@ -52,13 +58,39 @@ Dashboard pages are **server components** that fetch data directly from Shopify/
 
 ### Auth & Middleware
 
-- `src/auth.ts` — NextAuth config with Google provider, JWT token refresh logic, extended session types
-- `middleware.ts` — Protects all routes except `/login` and `/api/auth`; redirects with callback URL; forces re-auth on `RefreshTokenError`
-- Session type extensions in `src/types/next-auth.d.ts`
+- `src/lib/auth/index.ts` — better-auth server config (Google provider, Drizzle adapter, email allowlist). Exports `auth` and `getSession(headers)` (the enriched session helper that loads permissions from RBAC tables).
+- `src/lib/auth/client.ts` — better-auth React client (`useSession`, `signIn`, `signOut`). Import here, not from `better-auth/react` directly.
+- `src/lib/auth/permissions.ts` — `hasPermission(session, key)` and `requirePermission(session, key)`.
+- `src/proxy.ts` — Cookie-presence check via `getSessionCookie` from `better-auth/cookies` (no DB round-trip on edge). Server components re-validate via `getSession(await headers())`.
+
+**Server session reads** (in server components or route handlers):
+```ts
+import { getSession } from "@/lib/auth";
+import { headers } from "next/headers";
+const session = await getSession(await headers());
+```
 
 ### Environment Variables
 
-Validated via Zod in `src/lib/env.ts` (lazy proxy pattern). Required: `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `SHOPIFY_STORE_DOMAIN`, `SHOPIFY_ADMIN_ACCESS_TOKEN`, `SHOPIFY_API_VERSION`. See `.env.local.example`.
+Validated via Zod in `src/lib/env.ts` (lazy proxy pattern). Required: `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `SHOPIFY_STORE_DOMAIN`, `SHOPIFY_ADMIN_ACCESS_TOKEN`, `SHOPIFY_API_VERSION`, `DATABASE_URL`, `BETTER_AUTH_URL`, `PUSHER_APP_ID`, `PUSHER_KEY`, `PUSHER_SECRET`, `PUSHER_CLUSTER`, `NEXT_PUBLIC_PUSHER_KEY`, `NEXT_PUBLIC_PUSHER_CLUSTER`. See `.env.local.example`.
+
+**Note:** `src/lib/db/index.ts` and `src/lib/auth/index.ts` access `process.env` directly (not via `env.ts`) so that `next build` succeeds before credentials are configured. All other code uses the validated `env` proxy.
+
+## Database
+
+- **Stack:** Neon Postgres + Drizzle ORM, connected via `@neondatabase/serverless` HTTP driver.
+- **Schema:** `src/lib/db/schema/` — one file per domain (`users`, `rbac`, `drops`, `audit`).
+- **Migration workflow:** Edit schema → `npm run db:generate` → commit the generated file in `drizzle/migrations/` → `npm run db:migrate` to apply.
+- **All queries via Drizzle** — never raw SQL.
+- **`change_log` is append-only** — no update or delete operations against that table, ever.
+
+## Event Emission
+
+Every state change that matters calls `emitEvent(name, payload)` from `src/lib/events/emit.ts`.
+
+- Currently writes one append-only row to `change_log`.
+- Future integrations (Inngest job trigger, Slack notification, Pusher broadcast) hook into this helper — not into individual save routes.
+- Every save route MUST call `emitEvent(...)` even if no subscribers exist yet.
 
 ## Conventions
 
@@ -97,6 +129,39 @@ in Shopify with a date string in `M.D.YY` format (e.g. `5.1.26`, `5.15.26`).
 - `src/types/drops.ts` — Drop, DropProduct, WorkflowTab, DropStatus types
 
 ## Testing
+
 - Run `npm test` before marking any drops-related task complete
-- Run `npm run test:e2e` before marking a full page build complete  
+- Run `npm run test:e2e` before marking a full page build complete
 - All pure functions in `src/lib/drops/` must maintain 100% test coverage
+
+## Current Phase
+
+I am the sole engineer on this project, working with Claude Code.
+We are building Phase 1 of an internal operations platform for FashioNica.
+
+### Phase 1 scope
+
+- Postgres + Drizzle + better-auth + Pusher infrastructure
+- Audit logging via change_log table
+- Event emission pattern for every state change
+- Drop Calendar page
+- Drop Status Board page
+- Drop Workspace with fully working Pricing tab + stub tabs for Copy/Specs/Media/Channels
+
+### Not in scope (defer to Phase 2+)
+
+- Shopify-to-DB inversion (Shopify stays source of truth for product data)
+- Background job workers (no Inngest yet)
+- Multichannel sync automation
+- Vendor portal, service inbox, marketing attribution
+- Real-time presence wired into pages (infrastructure only)
+
+### Working principles
+
+- Optimize for Phase 1 scope while leaving doors open for Phase 2+
+- Reject suggestions to expand scope mid-session
+- Every state change in save routes calls emitEvent(...) — even if no subscribers exist yet
+- Shopify is source of truth for product/order data
+- Database is source of truth for operational metadata: sign-offs, audit log, users, roles, dismissed alerts
+- All DB queries via Drizzle, never raw SQL
+- Permissions checked via better-auth session.user.permissions

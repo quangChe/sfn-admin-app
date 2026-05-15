@@ -1,4 +1,5 @@
-import { auth } from "@/auth";
+import { getSession } from "@/lib/auth";
+import { headers } from "next/headers";
 import { SummaryCard } from "@/components/dashboard/summary-card";
 import { SalesChart } from "@/components/dashboard/sales-chart";
 import { getShopifyClient } from "@/lib/shopify/client";
@@ -64,7 +65,7 @@ async function getAnalytics() {
 }
 
 export default async function DashboardPage() {
-  const session = await auth();
+  const session = await getSession(await headers());
   const analytics = await getAnalytics();
 
   return (

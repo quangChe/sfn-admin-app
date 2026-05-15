@@ -16,6 +16,12 @@ export interface DropTag {
   type: DropType;
 }
 
+export interface WorkflowSignoff {
+  signedOffBy: string;
+  signedOffAt: string; // ISO string
+  note: string | null;
+}
+
 export interface Drop {
   tag: DropTag;
   name: string;
@@ -24,6 +30,7 @@ export interface Drop {
   status: DropStatus;
   channels: Channel[];
   completionPct: number;
+  signoffs: Partial<Record<WorkflowStage, WorkflowSignoff>>;
 }
 
 // JSON-serializable shape returned by API routes (date as ISO string)
@@ -37,6 +44,7 @@ export interface DropApiDrop {
   status: DropStatus;
   channels: Channel[];
   completionPct: number;
+  signoffs: Partial<Record<WorkflowStage, WorkflowSignoff>>;
 }
 
 export interface DropProductImage {

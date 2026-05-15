@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/auth";
+import { auth } from "@/lib/auth";
 import Anthropic from "@anthropic-ai/sdk";
 
 const client = new Anthropic();
 
-export const POST = auth(async (req) => {
-  if (!req.auth) {
+export async function POST(req: Request) {
+  const session = await auth.api.getSession({ headers: req.headers });
+  if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -68,7 +69,6 @@ Where low = lower end of market, mid = fair market value, high = premium conditi
     return NextResponse.json(result);
   } catch (error) {
     console.error("AI price suggest error:", error);
-    // Fallback: return a rough estimate
     return NextResponse.json({
       low: 0,
       mid: 0,
@@ -77,4 +77,4 @@ Where low = lower end of market, mid = fair market value, high = premium conditi
       error: "Could not retrieve market prices",
     });
   }
-});
+}

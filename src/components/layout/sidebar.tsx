@@ -27,11 +27,14 @@ const iconMap: Record<string, LucideIcon> = {
   CalendarDays,
 };
 
-export function Sidebar() {
+export function Sidebar({ permissions = [] }: { permissions?: string[] }) {
   const pathname = usePathname();
 
-  const shopifyItems = navItems.filter((i) => i.group === "shopify");
-  const mainItems = navItems.filter((i) => i.group === "main");
+  const visible = navItems.filter(
+    (i) => !i.requiredPermission || permissions.includes(i.requiredPermission)
+  );
+  const shopifyItems = visible.filter((i) => i.group === "shopify");
+  const mainItems = visible.filter((i) => i.group === "main");
 
   function NavLink({ item }: { item: (typeof navItems)[0] }) {
     const Icon = iconMap[item.icon];

@@ -1,7 +1,7 @@
 "use client";
 
-import { signOut } from "next-auth/react";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "@/lib/auth/client";
+import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -15,6 +15,7 @@ import { LogOut, User } from "lucide-react";
 
 export function Header() {
   const { data: session } = useSession();
+  const router = useRouter();
   const user = session?.user;
   const initials = user?.name
     ? user.name
@@ -50,7 +51,11 @@ export function Header() {
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
-            onClick={() => signOut({ callbackUrl: "/login" })}
+            onClick={() =>
+              signOut({
+                fetchOptions: { onSuccess: () => router.push("/login") },
+              })
+            }
             className="text-destructive focus:text-destructive"
           >
             <LogOut className="mr-2 h-4 w-4" />

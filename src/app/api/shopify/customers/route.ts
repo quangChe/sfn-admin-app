@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/auth";
+import { auth } from "@/lib/auth";
 import { getShopifyClient } from "@/lib/shopify/client";
 import { CUSTOMERS_QUERY } from "@/lib/shopify/queries/customers";
 
-export const GET = auth(async (req) => {
-  if (!req.auth) {
+export async function GET(req: Request) {
+  const session = await auth.api.getSession({ headers: req.headers });
+  if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -28,4 +29,4 @@ export const GET = auth(async (req) => {
     console.error("Shopify customers error:", error);
     return NextResponse.json({ error: "Failed to fetch customers" }, { status: 500 });
   }
-});
+}

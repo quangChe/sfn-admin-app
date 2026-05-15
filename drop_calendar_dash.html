@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FashioNica — Drop Management Mockup</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap');
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --burgundy:#5f211b;--burgundy-l:#7a2b24;--burgundy-muted:#f5eeec;
+    --cream:#faf8f5;--warm-gray:#f2ede9;--border:#e5ddd8;
+    --text:#1a1108;--text-muted:#8a7a72;--gold:#c9a96e;
+    --green:#3d7a5a;--green-bg:#edf5f0;--blue:#2a5f8a;--blue-bg:#eaf0f6;
+    --radius:8px;
+  }
+  body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);font-size:13px;line-height:1.5;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+  .topbar{display:flex;align-items:center;gap:16px;background:var(--burgundy);color:white;padding:0 20px;height:48px;flex-shrink:0}
+  .topbar-logo{font-family:'Playfair Display',serif;font-size:15px;letter-spacing:.08em;font-weight:600}
+  .topbar-sep{width:1px;height:20px;background:rgba(255,255,255,.2)}
+  .topbar-nav{display:flex;gap:2px}
+  .topbar-nav a{color:rgba(255,255,255,.65);padding:6px 10px;border-radius:5px;cursor:pointer;font-size:12.5px;text-decoration:none;transition:all .15s}
+  .topbar-nav a:hover,.topbar-nav a.active{color:white;background:rgba(255,255,255,.12)}
+  .topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+  .avatar{width:28px;height:28px;border-radius:50%;background:var(--gold);color:white;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600}
+  .main{display:flex;flex:1;overflow:hidden}
+  .panel{display:none;flex:1;overflow:hidden;flex-direction:column}
+  .panel.active{display:flex}
+
+  /* CALENDAR */
+  .cal-wrap{flex:1;overflow-y:auto;padding:24px;display:grid;grid-template-columns:1fr 280px;gap:20px;align-items:start}
+  .section-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:400;margin-bottom:4px}
+  .section-sub{color:var(--text-muted);font-size:12px;margin-bottom:20px}
+  .cal-month-nav{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+  .cal-month-label{font-size:15px;font-weight:600}
+  .btn-icon{width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:white;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--text-muted);transition:all .15s}
+  .btn-icon:hover{background:var(--burgundy);color:white;border-color:var(--burgundy)}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+  .cal-dow{text-align:center;font-size:10.5px;font-weight:600;color:var(--text-muted);padding:4px 0;text-transform:uppercase;letter-spacing:.06em}
+  .cal-day{aspect-ratio:1;border-radius:6px;border:1px solid transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;padding:4px;background:white}
+  .cal-day.empty{background:transparent;border-color:transparent;cursor:default}
+  .cal-day:not(.empty):hover{border-color:var(--burgundy)}
+  .cal-day.has-drop{background:var(--burgundy-muted);border-color:#d8b8b4}
+  .cal-day.has-drop:hover{background:#edd8d5;border-color:var(--burgundy)}
+  .cal-day.today .day-num{background:var(--burgundy);color:white;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center}
+  .day-num{font-size:12px;font-weight:500;line-height:1}
+  .drop-dot{width:5px;height:5px;border-radius:50%;background:var(--burgundy);margin-top:3px}
+  .drop-count{font-size:9px;color:var(--burgundy);font-weight:600}
+  .sidebar-panel{display:flex;flex-direction:column;gap:10px}
+  .sidebar-label{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
+  .drop-card{background:white;border:1px solid var(--border);border-radius:10px;padding:12px 14px;cursor:pointer;transition:all .15s}
+  .drop-card:hover{border-color:var(--burgundy);box-shadow:0 2px 8px rgba(95,33,27,.08)}
+  .drop-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+  .drop-tag{font-family:'Playfair Display',serif;font-size:14px;font-weight:600;color:var(--burgundy)}
+  .drop-badge{font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;text-transform:uppercase;letter-spacing:.05em}
+  .badge-upcoming{background:var(--blue-bg);color:var(--blue)}
+  .badge-live{background:var(--green-bg);color:var(--green)}
+  .badge-draft{background:var(--warm-gray);color:var(--text-muted)}
+  .drop-meta{font-size:11.5px;color:var(--text-muted)}
+  .drop-channel-pills{display:flex;gap:4px;margin-top:6px}
+  .pill{font-size:9.5px;font-weight:600;padding:2px 6px;border-radius:4px;border:1px solid var(--border);color:var(--text-muted);background:var(--warm-gray)}
+  .pill.tiktok{color:#010101;border-color:#ccc}
+  .pill.whatnot{color:#7b21ff;border-color:#d4b5ff;background:#f3eeff}
+  .pill.shopify{color:#1a7a4a;border-color:#b5dfc8;background:#edf7f2}
+  .prog-bar-wrap{display:flex;align-items:center;gap:8px}
+  .prog-bar{height:4px;border-radius:2px;background:var(--border);flex:1;overflow:hidden}
+  .prog-fill{height:100%;background:var(--green);border-radius:2px}
+  .prog-label{font-size:10.5px;color:var(--text-muted);white-space:nowrap}
+
+  /* DETAIL */
+  .detail-wrap{flex:1;overflow-y:auto;padding:20px 24px}
+  .breadcrumb{display:flex;align-items:center;gap:6px;color:var(--text-muted);font-size:12px;margin-bottom:16px;cursor:pointer}
+  .breadcrumb span:last-child{color:var(--text);font-weight:500}
+  .drop-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px}
+  .drop-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:400;margin-bottom:4px}
+  .drop-info{display:flex;align-items:center;gap:8px;color:var(--text-muted);font-size:12px;flex-wrap:wrap}
+  .workflow-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+  .wf-tab{display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;border:1px solid var(--border);background:white;cursor:pointer;font-size:12.5px;font-weight:500;color:var(--text-muted);transition:all .15s}
+  .wf-tab:hover{border-color:var(--burgundy);color:var(--burgundy)}
+  .wf-tab.active{background:var(--burgundy);border-color:var(--burgundy);color:white}
+  .wf-tab .progress{font-size:10px;padding:1px 5px;border-radius:10px;background:rgba(255,255,255,.2);color:rgba(255,255,255,.85)}
+  .wf-tab:not(.active) .progress{background:var(--warm-gray);color:var(--text-muted)}
+  .bulk-table-wrap{border:1px solid var(--border);border-radius:10px;overflow:hidden;background:white}
+  .bulk-table{width:100%;border-collapse:collapse}
+  .bulk-table th{padding:10px 12px;font-size:11px;font-weight:600;color:var(--text-muted);text-align:left;border-bottom:1px solid var(--border);background:var(--warm-gray);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+  .bulk-table td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+  .bulk-table tr:last-child td{border-bottom:none}
+  .bulk-table tr:hover td{background:var(--cream)}
+  .product-thumb{width:48px;height:48px;border-radius:6px;border:1px solid var(--border);background:var(--warm-gray);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+  .product-cell{display:flex;align-items:center;gap:10px;min-width:200px}
+  .product-title{font-weight:500;font-size:12.5px;line-height:1.3;max-width:180px}
+  .product-sku{font-size:10.5px;color:var(--text-muted)}
+  .price-input{width:90px;border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);background:white;outline:none;transition:border-color .15s}
+  .price-input:focus{border-color:var(--burgundy);box-shadow:0 0 0 2px rgba(95,33,27,.1)}
+  .price-input.compare{color:var(--text-muted)}
+  .cell-actions{display:flex;gap:4px}
+  .mini-btn{padding:4px 8px;border-radius:5px;border:1px solid var(--border);font-size:10.5px;font-weight:500;cursor:pointer;background:white;color:var(--text-muted);transition:all .15s;white-space:nowrap}
+  .mini-btn:hover{border-color:var(--burgundy);color:var(--burgundy)}
+  .mini-btn.ai{border-color:#a78bfa;color:#7c3aed;background:#f5f3ff}
+  .status-dot{width:7px;height:7px;border-radius:50%;display:inline-block}
+  .dot-done{background:var(--green)}
+  .dot-empty{background:var(--border)}
+  .annotation-row{display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+  .annotation{background:var(--blue-bg);border:1px solid #c5d8eb;border-radius:8px;padding:10px 14px;flex:1;min-width:180px}
+  .annotation-title{font-weight:600;font-size:11.5px;color:var(--blue);margin-bottom:3px}
+  .annotation-body{font-size:11px;color:#4a6a85;line-height:1.5}
+  .save-bar{padding:12px 24px;background:white;border-top:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-shrink:0}
+  .save-bar-left{font-size:12.5px;color:var(--text-muted)}
+  .btn-primary{padding:8px 20px;background:var(--burgundy);color:white;border:none;border-radius:7px;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background .15s}
+  .btn-primary:hover{background:var(--burgundy-l)}
+  .btn-ghost{padding:8px 16px;background:white;color:var(--text);border:1px solid var(--border);border-radius:7px;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s}
+  .btn-ghost:hover{border-color:var(--text)}
+  .expand-btn{font-size:10px;color:var(--text-muted);cursor:pointer;border:1px solid var(--border);border-radius:4px;padding:1px 5px;background:none;font-family:'DM Sans',sans-serif}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-logo">FN Admin</div>
+  <div class="topbar-sep"></div>
+  <nav class="topbar-nav">
+    <a href="#" class="active" onclick="showPanel('calendar',this);return false">Drop Calendar</a>
+    <a href="#" onclick="showPanel('products',this);return false">Products</a>
+    <a href="#" onclick="showPanel('products',this);return false">Orders</a>
+    <a href="#" onclick="showPanel('products',this);return false">Analytics</a>
+  </nav>
+  <div class="topbar-right">
+    <span style="font-size:11.5px;color:rgba(255,255,255,.6)">May 2026</span>
+    <div class="avatar">QN</div>
+  </div>
+</div>
+
+<div class="main">
+  <!-- CALENDAR PANEL -->
+  <div class="panel active" id="panel-calendar">
+    <div class="cal-wrap">
+      <div>
+        <div class="section-title">Drop Calendar</div>
+        <div class="section-sub">Drops tagged "M.D.YY" on Shopify. Click any highlighted date to open the bulk-edit workspace.</div>
+        <div class="cal-month-nav">
+          <button class="btn-icon">‹</button>
+          <span class="cal-month-label">May 2026</span>
+          <button class="btn-icon">›</button>
+        </div>
+        <div class="cal-grid">
+          <div class="cal-dow">Sun</div><div class="cal-dow">Mon</div><div class="cal-dow">Tue</div>
+          <div class="cal-dow">Wed</div><div class="cal-dow">Thu</div><div class="cal-dow">Fri</div><div class="cal-dow">Sat</div>
+          <div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day empty"></div>
+          <div class="cal-day empty"></div>
+          <div class="cal-day"><span class="day-num">1</span></div>
+          <div class="cal-day"><span class="day-num">2</span></div>
+          <div class="cal-day"><span class="day-num">3</span></div>
+          <div class="cal-day"><span class="day-num">4</span></div>
+          <div class="cal-day"><span class="day-num">5</span></div>
+          <div class="cal-day"><span class="day-num">6</span></div>
+          <div class="cal-day"><span class="day-num">7</span></div>
+          <div class="cal-day has-drop" onclick="showDrop()">
+            <span class="day-num">8</span><div class="drop-dot"></div><span class="drop-count">32 items</span>
+          </div>
+          <div class="cal-day"><span class="day-num">9</span></div>
+          <div class="cal-day"><span class="day-num">10</span></div>
+          <div class="cal-day"><span class="day-num">11</span></div>
+          <div class="cal-day"><span class="day-num">12</span></div>
+          <div class="cal-day today"><span class="day-num">13</span></div>
+          <div class="cal-day"><span class="day-num">14</span></div>
+          <div class="cal-day has-drop" onclick="showDrop()">
+            <span class="day-num">15</span><div class="drop-dot"></div><span class="drop-count">28 items</span>
+          </div>
+          <div class="cal-day"><span class="day-num">16</span></div>
+          <div class="cal-day"><span class="day-num">17</span></div>
+          <div class="cal-day"><span class="day-num">18</span></div>
+          <div class="cal-day has-drop" onclick="showDrop()">
+            <span class="day-num">19</span><div class="drop-dot"></div><span class="drop-count">41 items</span>
+          </div>
+          <div class="cal-day"><span class="day-num">20</span></div>
+          <div class="cal-day"><span class="day-num">21</span></div>
+          <div class="cal-day"><span class="day-num">22</span></div>
+          <div class="cal-day"><span class="day-num">23</span></div>
+          <div class="cal-day has-drop" onclick="showDrop()">
+            <span class="day-num">24</span><div class="drop-dot"></div><span class="drop-count">22 items</span>
+          </div>
+          <div class="cal-day"><span class="day-num">25</span></div>
+          <div class="cal-day"><span class="day-num">26</span></div>
+          <div class="cal-day has-drop" onclick="showDrop()">
+            <span class="day-num">27</span><div class="drop-dot"></div><span class="drop-count">35 items</span>
+          </div>
+          <div class="cal-day"><span class="day-num">28</span></div>
+          <div class="cal-day"><span class="day-num">29</span></div>
+          <div class="cal-day"><span class="day-num">30</span></div>
+          <div class="cal-day has-drop" onclick="showDrop()">
+            <span class="day-num">31</span><div class="drop-dot"></div><span class="drop-count">18 items</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:16px;margin-top:14px;font-size:11px;color:var(--text-muted);align-items:center;">
+          <div style="display:flex;align-items:center;gap:5px;">
+            <div style="width:12px;height:12px;border-radius:3px;background:var(--burgundy-muted);border:1px solid #d8b8b4;"></div>
+            Drop date — click to open bulk-edit workspace
+          </div>
+          <div style="display:flex;align-items:center;gap:5px;">
+            <div style="width:12px;height:12px;border-radius:50%;background:var(--burgundy);"></div>
+            Today
+          </div>
+        </div>
+      </div>
+
+      <!-- UPCOMING SIDEBAR -->
+      <div class="sidebar-panel">
+        <div class="sidebar-label">Upcoming Drops</div>
+        <div class="drop-card" onclick="showDrop()">
+          <div class="drop-card-top">
+            <span class="drop-tag">May 15 · 5.15.26</span>
+            <span class="drop-badge badge-upcoming">Upcoming</span>
+          </div>
+          <div class="drop-meta" style="margin-bottom:6px;">28 products · Bag &amp; Jewelry Drop</div>
+          <div class="prog-bar-wrap">
+            <div class="prog-bar"><div class="prog-fill" style="width:68%"></div></div>
+            <span class="prog-label">Pricing 68%</span>
+          </div>
+          <div class="drop-channel-pills">
+            <span class="pill shopify">Shopify</span><span class="pill tiktok">TikTok</span><span class="pill whatnot">Whatnot</span>
+          </div>
+        </div>
+        <div class="drop-card" onclick="showDrop()">
+          <div class="drop-card-top">
+            <span class="drop-tag">May 19 · 5.19.26</span>
+            <span class="drop-badge badge-draft">Draft</span>
+          </div>
+          <div class="drop-meta" style="margin-bottom:6px;">41 products · Watch Drop</div>
+          <div class="prog-bar-wrap">
+            <div class="prog-bar"><div class="prog-fill" style="width:12%"></div></div>
+            <span class="prog-label">Pricing 12%</span>
+          </div>
+          <div class="drop-channel-pills">
+            <span class="pill shopify">Shopify</span><span class="pill whatnot">Whatnot</span>
+          </div>
+        </div>
+        <div class="drop-card" onclick="showDrop()">
+          <div class="drop-card-top">
+            <span class="drop-tag">May 24 · 5.24.26</span>
+            <span class="drop-badge badge-draft">Draft</span>
+          </div>
+          <div class="drop-meta" style="margin-bottom:6px;">22 products · Jewelry Drop</div>
+          <div class="prog-bar-wrap">
+            <div class="prog-bar"><div class="prog-fill" style="width:0%"></div></div>
+            <span class="prog-label">Not started</span>
+          </div>
+          <div class="drop-channel-pills">
+            <span class="pill shopify">Shopify</span><span class="pill tiktok">TikTok</span>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--text-muted);text-align:center;padding-top:4px;">+ 3 more upcoming drops</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DROP DETAIL PANEL -->
+  <div class="panel" id="panel-drop">
+    <div class="detail-wrap">
+      <div class="breadcrumb" onclick="showPanel('calendar',null)">
+        <span>← Drop Calendar</span><span style="color:var(--border)">/</span><span>May 15, 2026 — Bag &amp; Jewelry Drop</span>
+      </div>
+      <div class="drop-header">
+        <div>
+          <div class="drop-title">Bag &amp; Jewelry Drop — <span style="color:var(--burgundy)">5.15.26</span></div>
+          <div class="drop-info">
+            <span class="drop-badge badge-upcoming">Upcoming</span>
+            <span>·</span><span>28 products</span>
+            <span>·</span><span>2 days away</span>
+            <span>·</span>
+            <span class="pill shopify">Shopify</span><span class="pill tiktok">TikTok</span><span class="pill whatnot">Whatnot</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn-ghost">+ Add Products</button>
+          <button class="btn-primary">Publish Drop</button>
+        </div>
+      </div>
+
+      <div class="workflow-tabs">
+        <button class="wf-tab active" onclick="switchTab(this,'pricing')">
+          💰 Pricing <span class="progress">19/28</span>
+        </button>
+        <button class="wf-tab" onclick="switchTab(this,'copy')">
+          ✍️ Copy <span class="progress">28/28</span>
+        </button>
+        <button class="wf-tab" onclick="switchTab(this,'specs')">
+          📋 Specs <span class="progress">11/28</span>
+        </button>
+        <button class="wf-tab" onclick="switchTab(this,'media')">
+          📸 Media <span class="progress">28/28</span>
+        </button>
+        <button class="wf-tab" onclick="switchTab(this,'channels')">
+          📡 Channel Sync <span class="progress">0/28</span>
+        </button>
+      </div>
+
+      <!-- PRICING VIEW -->
+      <div id="view-pricing">
+        <div class="annotation-row">
+          <div class="annotation">
+            <div class="annotation-title">💡 AI Price Suggestions</div>
+            <div class="annotation-body">Click "Suggest" on any row to pull competitor pricing from Google Shopping, eBay, Vestiaire Collective &amp; The RealReal automatically.</div>
+          </div>
+          <div class="annotation" style="border-color:#d0c5f0;background:#f5f3ff;">
+            <div class="annotation-title" style="color:#7c3aed;">🔍 Google Lens</div>
+            <div class="annotation-body" style="color:#5a4080;">Reverse image search for any product to identify brand, model and market price range instantly.</div>
+          </div>
+        </div>
+        <div class="bulk-table-wrap">
+          <table class="bulk-table">
+            <thead>
+              <tr>
+                <th style="width:230px">Product</th>
+                <th>Cost</th>
+                <th>Sell Price</th>
+                <th>Compare At</th>
+                <th>Margin</th>
+                <th>✓</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><div class="product-cell"><div class="product-thumb">👜</div><div><div class="product-title">Chanel Classic Flap Medium Black Caviar GHW</div><div class="product-sku">CH-CF-001 <button class="expand-btn">+3 imgs</button></div></div></div></td>
+                <td style="color:var(--text-muted)">$2,800</td>
+                <td><input class="price-input" value="4,200"/></td>
+                <td><input class="price-input compare" value="5,200"/></td>
+                <td style="color:var(--green);font-weight:600">33%</td>
+                <td><span class="status-dot dot-done"></span></td>
+                <td><div class="cell-actions"><button class="mini-btn ai">✨ Suggest</button><button class="mini-btn">🔍 Lens</button></div></td>
+              </tr>
+              <tr>
+                <td><div class="product-cell"><div class="product-thumb">👜</div><div><div class="product-title">Louis Vuitton Neverfull MM Monogram</div><div class="product-sku">LV-NF-028 <button class="expand-btn">+5 imgs</button></div></div></div></td>
+                <td style="color:var(--text-muted)">$680</td>
+                <td><input class="price-input" value="1,150"/></td>
+                <td><input class="price-input compare" placeholder="—"/></td>
+                <td style="color:var(--green);font-weight:600">41%</td>
+                <td><span class="status-dot dot-done"></span></td>
+                <td><div class="cell-actions"><button class="mini-btn ai">✨ Suggest</button><button class="mini-btn">🔍 Lens</button></div></td>
+              </tr>
+              <tr>
+                <td><div class="product-cell"><div class="product-thumb">💍</div><div><div class="product-title">Cartier Love Bracelet 18k Yellow Gold Size 17</div><div class="product-sku">CT-LB-041 <button class="expand-btn">+2 imgs</button></div></div></div></td>
+                <td style="color:var(--text-muted)">$3,100</td>
+                <td><input class="price-input" placeholder="Enter price…" style="border-color:#e8c8c5"/></td>
+                <td><input class="price-input compare" placeholder="—"/></td>
+                <td style="color:var(--text-muted)">—</td>
+                <td><span class="status-dot dot-empty"></span></td>
+                <td><div class="cell-actions"><button class="mini-btn ai">✨ Suggest</button><button class="mini-btn">🔍 Lens</button></div></td>
+              </tr>
+              <tr>
+                <td><div class="product-cell"><div class="product-thumb">⌚</div><div><div class="product-title">Rolex Submariner Date 116610LN Steel</div><div class="product-sku">RLX-SUB-009 <button class="expand-btn">+4 imgs</button></div></div></div></td>
+                <td style="color:var(--text-muted)">$8,200</td>
+                <td><input class="price-input" placeholder="Enter price…" style="border-color:#e8c8c5"/></td>
+                <td><input class="price-input compare" placeholder="—"/></td>
+                <td style="color:var(--text-muted)">—</td>
+                <td><span class="status-dot dot-empty"></span></td>
+                <td><div class="cell-actions"><button class="mini-btn ai">✨ Suggest</button><button class="mini-btn">🔍 Lens</button></div></td>
+              </tr>
+              <tr><td colspan="7" style="text-align:center;color:var(--text-muted);font-size:12px;padding:14px;">+ 24 more products · <a href="#" style="color:var(--burgundy)">Load all 28</a></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="view-copy" style="display:none">
+        <div class="bulk-table-wrap">
+          <table class="bulk-table">
+            <thead><tr><th style="width:200px">Product</th><th>Title</th><th>Short Description / Condition Notes</th><th>✓</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><div class="product-cell"><div class="product-thumb">👜</div><div><div class="product-title">Chanel Classic Flap</div><div class="product-sku">CH-CF-001</div></div></div></td>
+                <td><input class="price-input" style="width:220px" value="Chanel Classic Flap Medium Black Caviar GHW"/></td>
+                <td><input class="price-input" style="width:280px" value="Pristine condition. Light corner wear. Original card included."/></td>
+                <td><span class="status-dot dot-done"></span></td>
+              </tr>
+              <tr><td colspan="4" style="text-align:center;color:var(--text-muted);font-size:12px;padding:30px">Edit titles, descriptions, condition notes &amp; specs across all drop products in one view.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="view-specs" style="display:none;background:white;border:1px solid var(--border);border-radius:10px;padding:60px;text-align:center;color:var(--text-muted);font-size:13px;">
+        📋 <strong>Specifications</strong> — Edit dimensions, material, condition grade (A/B/C), year, serial number, provenance, hardware color, and other structured fields across all products.
+      </div>
+      <div id="view-media" style="display:none;background:white;border:1px solid var(--border);border-radius:10px;padding:60px;text-align:center;color:var(--text-muted);font-size:13px;">
+        📸 <strong>Media Review</strong> — Verify all product images are uploaded, check ordering, flag items that need re-shoots, bulk reorder images.
+      </div>
+      <div id="view-channels" style="display:none;background:white;border:1px solid var(--border);border-radius:10px;padding:60px;text-align:center;color:var(--text-muted);font-size:13px;">
+        📡 <strong>Channel Sync</strong> — Review and push this drop to TikTok Shop and Whatnot with per-channel price overrides, channel-specific descriptions, and inventory allocation.
+      </div>
+    </div>
+
+    <div class="save-bar">
+      <div class="save-bar-left"><strong style="color:var(--text)">9 unsaved changes</strong> in Pricing view</div>
+      <div style="display:flex;gap:8px;margin-left:auto">
+        <button class="btn-ghost">Discard</button>
+        <button class="btn-primary">Save All Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PLACEHOLDER -->
+  <div class="panel" id="panel-products">
+    <div style="flex:1;display:flex;align-items:center;justify-content:center;color:var(--text-muted)">Other admin sections — Products, Orders, Analytics</div>
+  </div>
+</div>
+
+<script>
+function showPanel(name,el){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  if(el){document.querySelectorAll('.topbar-nav a').forEach(a=>a.classList.remove('active'));el.classList.add('active');}
+}
+function showDrop(){
+  showPanel('drop',null);
+  document.querySelectorAll('.topbar-nav a').forEach(a=>a.classList.remove('active'));
+}
+function switchTab(el,v){
+  document.querySelectorAll('.wf-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  ['pricing','copy','specs','media','channels'].forEach(n=>{
+    document.getElementById('view-'+n).style.display=n===v?'block':'none';
+  });
+}
+</script>
+</body>
+</html>

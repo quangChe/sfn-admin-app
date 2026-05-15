@@ -1,4 +1,8 @@
-import type { DropApiDrop, DropProduct } from "@/types/drops";
+import type { DropApiDrop, DropProduct, WorkflowSignoff, WorkflowStage } from "@/types/drops";
+
+// Satisfy TS while keeping mock-data readable
+type Signoffs = Partial<Record<WorkflowStage, WorkflowSignoff>>;
+const NO_SIGNOFFS: Signoffs = {};
 
 export const MOCK_DROPS: DropApiDrop[] = [
   {
@@ -11,6 +15,7 @@ export const MOCK_DROPS: DropApiDrop[] = [
     status: "ended",
     channels: ["shopify", "tiktok"],
     completionPct: 100,
+    signoffs: NO_SIGNOFFS,
   },
   {
     tag: "5.8.26",
@@ -22,6 +27,7 @@ export const MOCK_DROPS: DropApiDrop[] = [
     status: "ended",
     channels: ["shopify"],
     completionPct: 100,
+    signoffs: NO_SIGNOFFS,
   },
   {
     tag: "5.15.26",
@@ -33,6 +39,7 @@ export const MOCK_DROPS: DropApiDrop[] = [
     status: "upcoming",
     channels: ["shopify", "tiktok", "whatnot"],
     completionPct: 68,
+    signoffs: NO_SIGNOFFS,
   },
   {
     tag: "5.22.26",
@@ -44,6 +51,7 @@ export const MOCK_DROPS: DropApiDrop[] = [
     status: "draft",
     channels: ["shopify"],
     completionPct: 20,
+    signoffs: NO_SIGNOFFS,
   },
   {
     tag: "5.29.26",
@@ -55,6 +63,7 @@ export const MOCK_DROPS: DropApiDrop[] = [
     status: "future",
     channels: ["shopify"],
     completionPct: 0,
+    signoffs: NO_SIGNOFFS,
   },
 ];
 

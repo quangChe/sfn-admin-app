@@ -1,13 +1,14 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/auth";
+import { auth } from "@/lib/auth";
 import { getShopifyClient } from "@/lib/shopify/client";
 import {
   ANALYTICS_ORDERS_QUERY,
   SHOP_INFO_QUERY,
 } from "@/lib/shopify/queries/analytics";
 
-export const GET = auth(async (req) => {
-  if (!req.auth) {
+export async function GET(req: Request) {
+  const session = await auth.api.getSession({ headers: req.headers });
+  if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -35,8 +36,7 @@ export const GET = auth(async (req) => {
     }
 
     const orders = ordersResult.data?.orders?.edges ?? [];
-    const currency =
-      shopResult.data?.shop?.currencyCode ?? "USD";
+    const currency = shopResult.data?.shop?.currencyCode ?? "USD";
 
     const totalOrders = orders.length;
     const totalSales = orders.reduce((sum: number, edge: { node: { totalPriceSet: { shopMoney: { amount: string } } } }) => {
@@ -44,7 +44,6 @@ export const GET = auth(async (req) => {
     }, 0);
     const averageOrderValue = totalOrders > 0 ? totalSales / totalOrders : 0;
 
-    // Build daily sales chart data
     const dailySales: Record<string, number> = {};
     orders.forEach((edge: { node: { createdAt: string; totalPriceSet: { shopMoney: { amount: string } } } }) => {
       const date = edge.node.createdAt.split("T")[0];
@@ -75,4 +74,4 @@ export const GET = auth(async (req) => {
       { status: 500 }
     );
   }
-});
+}

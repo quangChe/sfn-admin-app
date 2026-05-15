@@ -4,36 +4,20 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import type { DropApiDrop } from "@/types/drops";
 
-const STATUS_BADGE: Record<
-  string,
-  { label: string; className: string }
-> = {
-  live: {
-    label: "Live",
-    className: "bg-[#5f211b] text-white",
-  },
-  upcoming: {
-    label: "Upcoming",
-    className: "bg-amber-100 text-amber-800",
-  },
-  draft: {
-    label: "Draft",
-    className: "bg-[#f2ede9] text-[#8a7a72]",
-  },
-  future: {
-    label: "Future",
-    className: "bg-blue-50 text-blue-700",
-  },
-  ended: {
-    label: "Ended",
-    className: "bg-gray-100 text-gray-500",
-  },
+// Colors match drop_calendar_dash.html lines 56-58
+const STATUS_BADGE: Record<string, { label: string; className: string }> = {
+  live:     { label: "Live",     className: "bg-[#edf5f0] text-[#3d7a5a]" },
+  upcoming: { label: "Upcoming", className: "bg-[#eaf0f6] text-[#2a5f8a]" },
+  draft:    { label: "Draft",    className: "bg-[#f2ede9] text-[#8a7a72]" },
+  future:   { label: "Future",   className: "bg-[#f2ede9] text-[#8a7a72]" },
+  ended:    { label: "Ended",    className: "bg-gray-100 text-gray-400" },
 };
 
+// Colors match drop_calendar_dash.html lines 62-64
 const CHANNEL_LABELS: Record<string, { label: string; color: string }> = {
-  shopify: { label: "Shopify", color: "bg-[#96bf48]/15 text-[#5a7a22]" },
-  tiktok: { label: "TikTok", color: "bg-gray-100 text-gray-600" },
-  whatnot: { label: "Whatnot", color: "bg-purple-50 text-purple-700" },
+  shopify: { label: "Shopify", color: "bg-[#edf7f2] text-[#1a7a4a] border border-[#b5dfc8]" },
+  tiktok:  { label: "TikTok",  color: "bg-[#f2f2f2] text-[#010101] border border-[#ccc]" },
+  whatnot: { label: "Whatnot", color: "bg-[#f3eeff] text-[#7b21ff] border border-[#d4b5ff]" },
 };
 
 interface Props {
@@ -121,7 +105,7 @@ export function DropSidebar({ drops }: Props) {
                   </div>
                   <div className="h-1.5 rounded-full bg-[#f2ede9] overflow-hidden">
                     <div
-                      className="h-full rounded-full bg-[#5f211b] transition-all"
+                      className="h-full rounded-full bg-[#3d7a5a] transition-all"
                       style={{ width: `${drop.completionPct}%` }}
                     />
                   </div>
@@ -139,7 +123,7 @@ export function DropSidebar({ drops }: Props) {
                     <span
                       key={ch}
                       className={cn(
-                        "rounded-md px-1.5 py-0.5 text-[10px] font-medium",
+                        "rounded px-1.5 py-0.5 text-[9.5px] font-semibold",
                         color
                       )}
                     >
