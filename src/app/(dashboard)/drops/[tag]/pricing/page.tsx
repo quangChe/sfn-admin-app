@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { use } from "react";
 import Image from "next/image";
 import {
@@ -325,8 +325,8 @@ export default function PricingPage({
               const isExpanded = expanded.has(product.id);
 
               return (
+                <Fragment key={product.id}>
                 <tr
-                  key={product.id}
                   className={cn(
                       "group transition-colors",
                       isDirty && "bg-[#faf8f5]",
@@ -581,7 +581,7 @@ export default function PricingPage({
                       </td>
                     </tr>
                   )}
-                </div>
+                </Fragment>
               );
             })}
           </tbody>
